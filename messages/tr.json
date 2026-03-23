@@ -1,0 +1,127 @@
+{
+  "home": {
+    "title": "Kripto sinyalleriniz,",
+    "titleBreak": "gerçek zamanlı",
+    "subtitle": "En iyi işlem sinyallerini alın ve uzmanların sizin yerinize işlem yapmasına izin verin.",
+    "cta": "Başla",
+    "login": "Giriş yap"
+  },
+  "auth": {
+    "register": {
+      "title": "Hesap oluştur",
+      "subtitle": "Kodex'e katılın ve kripto sinyallerine erişin",
+      "lastName": "Soyadı",
+      "firstName": "Adı",
+      "email": "E-posta",
+      "phone": "Telefon",
+      "country": "Ülke",
+      "selectCountry": "Bir ülke seçin",
+      "language": "Dil",
+      "password": "Şifre",
+      "passwordPlaceholder": "Min. 8 karakter",
+      "confirm": "Onay",
+      "confirmPlaceholder": "Onayla",
+      "promoCode": "Promosyon kodu",
+      "promoCodeOptional": "(isteğe bağlı)",
+      "promoCodePlaceholder": "Promosyon kodunuzu girin",
+      "submit": "Kayıt ol",
+      "submitting": "Kayıt olunuyor...",
+      "hasAccount": "Zaten hesabınız var mı?",
+      "loginLink": "Giriş yap",
+      "passwordMismatch": "Şifreler eşleşmiyor",
+      "error": "Bir hata oluştu"
+    },
+    "login": {
+      "title": "Giriş yap",
+      "subtitle": "Kodex alanınıza erişin",
+      "email": "E-posta",
+      "password": "Şifre",
+      "submit": "Giriş yap",
+      "submitting": "Giriş yapılıyor...",
+      "forgotPassword": "Şifremi unuttum?",
+      "noAccount": "Hesabınız yok mu?",
+      "registerLink": "Kayıt ol",
+      "error": "Bir hata oluştu"
+    },
+    "verifyEmail": {
+      "title": "E-posta doğrulama",
+      "subtitle": "Gönderilen kodu girin",
+      "placeholder": "Doğrulama kodu",
+      "submit": "Doğrula",
+      "submitting": "Doğrulanıyor...",
+      "resend": "Kodu yeniden gönder",
+      "resending": "Gönderiliyor...",
+      "resent": "Yeni bir kod gönderildi",
+      "error": "Bir hata oluştu",
+      "loading": "Yükleniyor..."
+    },
+    "forgotPassword": {
+      "title": "Şifremi unuttum",
+      "subtitle": "Sıfırlama kodu almak için e-postanızı girin",
+      "email": "E-posta",
+      "submit": "Kodu gönder",
+      "submitting": "Gönderiliyor...",
+      "sentTitle": "E-posta gönderildi",
+      "sentSubtitle": "Sıfırlama kodu gönderildi",
+      "enterCode": "Kodu gir",
+      "backToLogin": "Girişe dön",
+      "error": "Bir hata oluştu"
+    },
+    "resetPassword": {
+      "title": "Şifreyi sıfırla",
+      "subtitle": "E-posta ile aldığınız kodu ve yeni şifrenizi girin",
+      "code": "Doğrulama kodu",
+      "newPassword": "Yeni şifre",
+      "confirm": "Şifreyi onayla",
+      "submit": "Sıfırla",
+      "submitting": "Sıfırlanıyor...",
+      "backToLogin": "Girişe dön",
+      "passwordMismatch": "Şifreler eşleşmiyor",
+      "error": "Bir hata oluştu",
+      "loading": "Yükleniyor..."
+    }
+  },
+  "dashboard": {
+    "nav": {
+      "home": "Panel",
+      "calls": "Calls",
+      "news": "Haberler",
+      "tutorials": "Eğitimler",
+      "managed": "Yönetilen Trading",
+      "affiliation": "Ortaklık",
+      "subscription": "Abonelik",
+      "invoices": "Faturalar",
+      "settings": "Ayarlar"
+    },
+    "header": {
+      "logout": "Çıkış yap"
+    },
+    "home": {
+      "welcome": "Hoş geldiniz",
+      "trialBadge": "Ücretsiz deneme",
+      "trialEnds": "Ücretsiz denemeniz sona eriyor",
+      "subscribedBadge": "Abone",
+      "activeCalls": "Aktif call'lar",
+      "latestNews": "Son haberler",
+      "noContent": "Henüz içerik mevcut değil.",
+      "entry": "Giriş",
+      "stopLoss": "Zarar Durdur",
+      "noCalls": "Şu anda aktif call yok.",
+      "noNews": "Şu anda haber yok."
+    },
+    "subscribe": {
+      "title": "Devam etmek için abone olun",
+      "subtitle": "Ücretsiz denemeniz sona erdi. Sinyallere ve haberlere erişmek için abone olun.",
+      "signals": "Sinyaller",
+      "signalsDesc": "Tüm trading call'larına ve haberlere erişin. Kendiniz trade yapın.",
+      "managed": "Yönetilen Trading",
+      "managedDesc": "Uzmanlarımız sizin yerinize trade yapar. Sadece exchange hesabınızı bağlayın.",
+      "choosePlan": "Bu planı seç",
+      "perMonth": "/ay",
+      "1month": "1 ay",
+      "3months": "3 ay",
+      "6months": "6 ay",
+      "12months": "12 ay"
+    }
+  }
+}

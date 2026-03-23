@@ -1,0 +1,128 @@
+{
+  "home": {
+    "title": "Tus señales crypto,",
+    "titleBreak": "en tiempo real",
+    "subtitle": "Recibe las mejores señales de trading y deja que los expertos operen por ti.",
+    "cta": "Empezar",
+    "login": "Iniciar sesión"
+  },
+  "auth": {
+    "register": {
+      "title": "Crear una cuenta",
+      "subtitle": "Únete a Kodex y accede a las señales crypto",
+      "lastName": "Apellido",
+      "firstName": "Nombre",
+      "email": "Correo electrónico",
+      "phone": "Teléfono",
+      "country": "País",
+      "selectCountry": "Seleccionar un país",
+      "language": "Idioma",
+      "password": "Contraseña",
+      "passwordPlaceholder": "Mín. 8 caracteres",
+      "confirm": "Confirmación",
+      "confirmPlaceholder": "Confirmar",
+      "promoCode": "Código promocional",
+      "promoCodeOptional": "(opcional)",
+      "promoCodePlaceholder": "Ingresa tu código promocional",
+      "submit": "Registrarse",
+      "submitting": "Registrando...",
+      "hasAccount": "¿Ya tienes una cuenta?",
+      "loginLink": "Iniciar sesión",
+      "passwordMismatch": "Las contraseñas no coinciden",
+      "error": "Ocurrió un error"
+    },
+    "login": {
+      "title": "Iniciar sesión",
+      "subtitle": "Accede a tu espacio Kodex",
+      "email": "Correo electrónico",
+      "password": "Contraseña",
+      "submit": "Iniciar sesión",
+      "submitting": "Conectando...",
+      "forgotPassword": "¿Olvidaste tu contraseña?",
+      "noAccount": "¿No tienes cuenta?",
+      "registerLink": "Registrarse",
+      "error": "Ocurrió un error"
+    },
+    "verifyEmail": {
+      "title": "Verificación de correo",
+      "subtitle": "Ingresa el código enviado a",
+      "placeholder": "Código de verificación",
+      "submit": "Verificar",
+      "submitting": "Verificando...",
+      "resend": "Reenviar código",
+      "resending": "Enviando...",
+      "resent": "Se ha enviado un nuevo código",
+      "error": "Ocurrió un error",
+      "loading": "Cargando..."
+    },
+    "forgotPassword": {
+      "title": "Contraseña olvidada",
+      "subtitle": "Ingresa tu correo para recibir un código de restablecimiento",
+      "email": "Correo electrónico",
+      "submit": "Enviar código",
+      "submitting": "Enviando...",
+      "sentTitle": "Correo enviado",
+      "sentSubtitle": "Se ha enviado un código de restablecimiento a",
+      "enterCode": "Ingresar código",
+      "backToLogin": "Volver al inicio de sesión",
+      "error": "Ocurrió un error"
+    },
+    "resetPassword": {
+      "title": "Restablecer contraseña",
+      "subtitle": "Ingresa el código recibido por correo y tu nueva contraseña",
+      "code": "Código de verificación",
+      "newPassword": "Nueva contraseña",
+      "confirm": "Confirmar contraseña",
+      "submit": "Restablecer",
+      "submitting": "Restableciendo...",
+      "backToLogin": "Volver al inicio de sesión",
+      "passwordMismatch": "Las contraseñas no coinciden",
+      "error": "Ocurrió un error",
+      "loading": "Cargando..."
+    }
+  },
+  "dashboard": {
+    "nav": {
+      "home": "Panel",
+      "calls": "Calls",
+      "news": "Noticias",
+      "tutorials": "Tutoriales",
+      "managed": "Trading Gestionado",
+      "managed": "Trading Gestionado",
+      "affiliation": "Afiliación",
+      "subscription": "Suscripción",
+      "invoices": "Facturas",
+      "settings": "Configuración"
+    },
+    "header": {
+      "logout": "Cerrar sesión"
+    },
+    "home": {
+      "welcome": "Bienvenido",
+      "trialBadge": "Prueba gratuita",
+      "trialEnds": "Tu prueba gratuita termina el",
+      "subscribedBadge": "Suscrito",
+      "activeCalls": "Calls activos",
+      "latestNews": "Últimas noticias",
+      "noContent": "No hay contenido disponible por el momento.",
+      "entry": "Entrada",
+      "stopLoss": "Límite de pérdida",
+      "noCalls": "No hay calls activos por el momento.",
+      "noNews": "No hay noticias disponibles por el momento."
+    },
+    "subscribe": {
+      "title": "Suscríbete para continuar",
+      "subtitle": "Tu prueba gratuita ha expirado. Suscríbete para acceder a señales y noticias.",
+      "signals": "Señales",
+      "signalsDesc": "Accede a todos los calls de trading y noticias. Operas por tu cuenta.",
+      "managed": "Trading Gestionado",
+      "managedDesc": "Nuestros expertos operan por ti. Solo conecta tu cuenta de exchange.",
+      "choosePlan": "Elegir este plan",
+      "perMonth": "/mes",
+      "1month": "1 mes",
+      "3months": "3 meses",
+      "6months": "6 meses",
+      "12months": "12 meses"
+    }
+  }
+}

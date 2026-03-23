@@ -1,0 +1,127 @@
+{
+  "home": {
+    "title": "Vos signaux crypto,",
+    "titleBreak": "en temps réel",
+    "subtitle": "Recevez les meilleurs calls de trading et laissez les experts trader pour vous.",
+    "cta": "Commencer",
+    "login": "Se connecter"
+  },
+  "auth": {
+    "register": {
+      "title": "Créer un compte",
+      "subtitle": "Rejoignez Kodex et accédez aux signaux crypto",
+      "lastName": "Nom",
+      "firstName": "Prénom",
+      "email": "Email",
+      "phone": "Téléphone",
+      "country": "Pays",
+      "selectCountry": "Sélectionner un pays",
+      "language": "Langues",
+      "password": "Mot de passe",
+      "passwordPlaceholder": "Min. 8 caractères",
+      "confirm": "Confirmation",
+      "confirmPlaceholder": "Confirmer",
+      "promoCode": "Code promo",
+      "promoCodeOptional": "(optionnel)",
+      "promoCodePlaceholder": "Entrez votre code promo",
+      "submit": "S'inscrire",
+      "submitting": "Inscription...",
+      "hasAccount": "Déjà un compte ?",
+      "loginLink": "Se connecter",
+      "passwordMismatch": "Les mots de passe ne correspondent pas",
+      "error": "Une erreur est survenue"
+    },
+    "login": {
+      "title": "Connexion",
+      "subtitle": "Accédez à votre espace Kodex",
+      "email": "Email",
+      "password": "Mot de passe",
+      "submit": "Se connecter",
+      "submitting": "Connexion...",
+      "forgotPassword": "Mot de passe oublié ?",
+      "noAccount": "Pas encore de compte ?",
+      "registerLink": "S'inscrire",
+      "error": "Une erreur est survenue"
+    },
+    "verifyEmail": {
+      "title": "Vérification email",
+      "subtitle": "Entrez le code envoyé à",
+      "placeholder": "Code de vérification",
+      "submit": "Vérifier",
+      "submitting": "Vérification...",
+      "resend": "Renvoyer le code",
+      "resending": "Envoi en cours...",
+      "resent": "Un nouveau code a été envoyé",
+      "error": "Une erreur est survenue",
+      "loading": "Chargement..."
+    },
+    "forgotPassword": {
+      "title": "Mot de passe oublié",
+      "subtitle": "Entrez votre email pour recevoir un code de réinitialisation",
+      "email": "Email",
+      "submit": "Envoyer le code",
+      "submitting": "Envoi...",
+      "sentTitle": "Email envoyé",
+      "sentSubtitle": "Un code de réinitialisation a été envoyé à",
+      "enterCode": "Entrer le code",
+      "backToLogin": "Retour à la connexion",
+      "error": "Une erreur est survenue"
+    },
+    "resetPassword": {
+      "title": "Réinitialiser le mot de passe",
+      "subtitle": "Entrez le code reçu par email et votre nouveau mot de passe",
+      "code": "Code de vérification",
+      "newPassword": "Nouveau mot de passe",
+      "confirm": "Confirmer le mot de passe",
+      "submit": "Réinitialiser",
+      "submitting": "Réinitialisation...",
+      "backToLogin": "Retour à la connexion",
+      "passwordMismatch": "Les mots de passe ne correspondent pas",
+      "error": "Une erreur est survenue",
+      "loading": "Chargement..."
+    }
+  },
+  "dashboard": {
+    "nav": {
+      "home": "Tableau de bord",
+      "calls": "Calls",
+      "news": "Actualités",
+      "tutorials": "Tutoriels",
+      "managed": "Trading Géré",
+      "affiliation": "Affiliation",
+      "subscription": "Abonnement",
+      "invoices": "Factures",
+      "settings": "Paramètres"
+    },
+    "header": {
+      "logout": "Déconnexion"
+    },
+    "home": {
+      "welcome": "Bienvenue",
+      "trialBadge": "Essai gratuit",
+      "trialEnds": "Votre essai gratuit se termine le",
+      "subscribedBadge": "Abonné",
+      "activeCalls": "Calls actifs",
+      "latestNews": "Dernières actualités",
+      "noContent": "Aucun contenu disponible pour le moment.",
+      "entry": "Entrée",
+      "stopLoss": "Limite de perte",
+      "noCalls": "Aucun call actif pour le moment.",
+      "noNews": "Aucune actualité disponible pour le moment."
+    },
+    "subscribe": {
+      "title": "Abonnez-vous pour continuer",
+      "subtitle": "Votre essai gratuit a expiré. Abonnez-vous pour accéder aux signaux et actualités.",
+      "signals": "Signaux",
+      "signalsDesc": "Accédez à tous les calls de trading et aux actualités. Vous tradez par vous-même.",
+      "managed": "Trading Géré",
+      "managedDesc": "Nos experts tradent pour vous. Connectez simplement votre compte exchange.",
+      "choosePlan": "Choisir ce plan",
+      "perMonth": "/mois",
+      "1month": "1 mois",
+      "3months": "3 mois",
+      "6months": "6 mois",
+      "12months": "12 mois"
+    }
+  }
+}

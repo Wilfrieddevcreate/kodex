@@ -1,0 +1,128 @@
+{
+  "home": {
+    "title": "Your crypto signals,",
+    "titleBreak": "in real time",
+    "subtitle": "Get the best trading calls and let experts trade for you.",
+    "cta": "Get Started",
+    "login": "Sign in"
+  },
+  "auth": {
+    "register": {
+      "title": "Create an account",
+      "subtitle": "Join Kodex and access crypto signals",
+      "lastName": "Last name",
+      "firstName": "First name",
+      "email": "Email",
+      "phone": "Phone",
+      "country": "Country",
+      "selectCountry": "Select a country",
+      "language": "Language",
+      "password": "Password",
+      "passwordPlaceholder": "Min. 8 characters",
+      "confirm": "Confirm",
+      "confirmPlaceholder": "Confirm",
+      "promoCode": "Promo code",
+      "promoCodeOptional": "(optional)",
+      "promoCodePlaceholder": "Enter your promo code",
+      "submit": "Sign up",
+      "submitting": "Signing up...",
+      "hasAccount": "Already have an account?",
+      "loginLink": "Sign in",
+      "passwordMismatch": "Passwords do not match",
+      "error": "An error occurred"
+    },
+    "login": {
+      "title": "Sign in",
+      "subtitle": "Access your Kodex dashboard",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Sign in",
+      "submitting": "Signing in...",
+      "forgotPassword": "Forgot password?",
+      "noAccount": "Don't have an account?",
+      "registerLink": "Sign up",
+      "error": "An error occurred"
+    },
+    "verifyEmail": {
+      "title": "Email verification",
+      "subtitle": "Enter the code sent to",
+      "placeholder": "Verification code",
+      "submit": "Verify",
+      "submitting": "Verifying...",
+      "resend": "Resend code",
+      "resending": "Sending...",
+      "resent": "A new code has been sent",
+      "error": "An error occurred",
+      "loading": "Loading..."
+    },
+    "forgotPassword": {
+      "title": "Forgot password",
+      "subtitle": "Enter your email to receive a reset code",
+      "email": "Email",
+      "submit": "Send code",
+      "submitting": "Sending...",
+      "sentTitle": "Email sent",
+      "sentSubtitle": "A reset code has been sent to",
+      "enterCode": "Enter code",
+      "backToLogin": "Back to login",
+      "error": "An error occurred"
+    },
+    "resetPassword": {
+      "title": "Reset password",
+      "subtitle": "Enter the code received by email and your new password",
+      "code": "Verification code",
+      "newPassword": "New password",
+      "confirm": "Confirm password",
+      "submit": "Reset",
+      "submitting": "Resetting...",
+      "backToLogin": "Back to login",
+      "passwordMismatch": "Passwords do not match",
+      "error": "An error occurred",
+      "loading": "Loading..."
+    }
+  },
+  "dashboard": {
+    "nav": {
+      "home": "Dashboard",
+      "calls": "Calls",
+      "news": "News",
+      "tutorials": "Tutorials",
+      "managed": "Managed Trading",
+      "managed": "Managed Trading",
+      "affiliation": "Affiliation",
+      "subscription": "Subscription",
+      "invoices": "Invoices",
+      "settings": "Settings"
+    },
+    "header": {
+      "logout": "Sign out"
+    },
+    "home": {
+      "welcome": "Welcome",
+      "trialBadge": "Free trial",
+      "trialEnds": "Your free trial ends on",
+      "subscribedBadge": "Subscribed",
+      "activeCalls": "Active calls",
+      "latestNews": "Latest news",
+      "noContent": "No content available yet.",
+      "entry": "Entry",
+      "stopLoss": "Stop Loss",
+      "noCalls": "No active calls at the moment.",
+      "noNews": "No news available at the moment."
+    },
+    "subscribe": {
+      "title": "Subscribe to continue",
+      "subtitle": "Your free trial has expired. Subscribe to access signals and news.",
+      "signals": "Signals",
+      "signalsDesc": "Access all trading calls and news. You trade on your own.",
+      "managed": "Managed Trading",
+      "managedDesc": "Our experts trade for you. Just connect your exchange account.",
+      "choosePlan": "Choose this plan",
+      "perMonth": "/mo",
+      "1month": "1 month",
+      "3months": "3 months",
+      "6months": "6 months",
+      "12months": "12 months"
+    }
+  }
+}
