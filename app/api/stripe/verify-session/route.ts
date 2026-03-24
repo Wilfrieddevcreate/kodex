@@ -5,9 +5,8 @@ import { stripe } from "@/app/lib/stripe";
 import { notifyUser, notifyAdmins } from "@/app/lib/notifications";
 
 /**
- * This endpoint verifies the Stripe checkout session after redirect.
- * It creates the subscription if the webhook hasn't fired yet (common in local dev).
- * In production, the webhook handles this, but this is a safety net.
+ * Verifies Stripe checkout session after redirect.
+ * Creates subscription if webhook hasn't fired yet (safety net for local dev).
  */
 export async function POST(request: Request) {
   const session = await getSession();
@@ -17,40 +16,40 @@ export async function POST(request: Request) {
     const { sessionId } = await request.json();
     if (!sessionId) return NextResponse.json({ error: "Missing session ID" }, { status: 400 });
 
-    // Check if subscription already exists (webhook already processed it)
-    const existingSub = await prisma.subscription.findFirst({
-      where: { stripeSubscriptionId: sessionId },
-    });
-    if (existingSub) {
-      return NextResponse.json({ status: "already_processed", subscription: existingSub });
-    }
-
-    // Retrieve the checkout session from Stripe
+    // Retrieve checkout session from Stripe
     const checkoutSession = await stripe.checkout.sessions.retrieve(sessionId);
     if (checkoutSession.payment_status !== "paid") {
       return NextResponse.json({ error: "Payment not completed" }, { status: 400 });
     }
 
-    const { userId, plan, months } = checkoutSession.metadata || {};
-    if (!userId || userId !== session.userId || !plan || !months) {
+    const stripeSubId = checkoutSession.subscription as string;
+    if (!stripeSubId) return NextResponse.json({ error: "No subscription" }, { status: 400 });
+
+    // Check if already processed
+    const existingSub = await prisma.subscription.findFirst({
+      where: { stripeSubscriptionId: stripeSubId },
+    });
+    if (existingSub) {
+      return NextResponse.json({ status: "already_processed", subscription: existingSub });
+    }
+
+    const { userId, type } = checkoutSession.metadata || {};
+    if (!userId || userId !== session.userId || !type) {
       return NextResponse.json({ error: "Invalid session" }, { status: 400 });
     }
 
-    const monthsNum = parseInt(months);
+    // Get subscription details from Stripe
+    const stripeSub = await stripe.subscriptions.retrieve(stripeSubId) as unknown as { current_period_start: number; current_period_end: number };
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { firstName: true, lastName: true, email: true, trialEndsAt: true },
+      select: { firstName: true, lastName: true, email: true },
     });
     if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
-    // Period calculation: starts after trial if trial is still active
-    const now = new Date();
-    const periodStart = user.trialEndsAt && user.trialEndsAt > now ? new Date(user.trialEndsAt) : now;
-    const periodEnd = new Date(periodStart);
-    periodEnd.setMonth(periodEnd.getMonth() + monthsNum);
-
-    const subscriptionType = plan === "managed" ? "MANAGED" as const : "SIGNALS" as const;
-    const planLabel = `${plan === "managed" ? "Managed Trading" : "Signals"} — ${monthsNum} month${monthsNum > 1 ? "s" : ""}`;
+    const subscriptionType = type === "MANAGED" ? "MANAGED" as const : "SIGNALS" as const;
+    const planLabel = subscriptionType === "MANAGED" ? "Managed Trading" : "Signals";
+    const periodStart = new Date(stripeSub.current_period_start * 1000);
+    const periodEnd = new Date(stripeSub.current_period_end * 1000);
     const amount = (checkoutSession.amount_total || 0) / 100;
 
     // Create subscription
@@ -59,8 +58,8 @@ export async function POST(request: Request) {
         userId,
         type: subscriptionType,
         status: "ACTIVE",
-        stripeSubscriptionId: sessionId,
-        stripePriceId: checkoutSession.metadata?.priceId || null,
+        stripeSubscriptionId: stripeSubId,
+        stripePriceId: checkoutSession.metadata?.planId || null,
         currentPeriodStart: periodStart,
         currentPeriodEnd: periodEnd,
       },
@@ -88,8 +87,14 @@ export async function POST(request: Request) {
     });
 
     // Notifications
-    await notifyUser(userId, "Subscription activated", `Your ${planLabel} subscription is now active. Valid until ${periodEnd.toLocaleDateString("en-US")}.`, "system");
-    await notifyAdmins("New subscription", `${user.firstName} ${user.lastName} (${user.email}) subscribed to ${planLabel} for ${amount.toFixed(2)}€.`, "system");
+    await notifyUser(userId, "Subscription activated",
+      `Your ${planLabel} subscription is now active. Next billing: ${periodEnd.toLocaleDateString("en-US")}.`,
+      "system"
+    );
+    await notifyAdmins("New subscription",
+      `${user.firstName} ${user.lastName} (${user.email}) subscribed to ${planLabel} for ${amount.toFixed(2)}€.`,
+      "system"
+    );
 
     return NextResponse.json({ status: "created", subscription });
   } catch (error) {

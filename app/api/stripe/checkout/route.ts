@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/app/lib/auth";
 import { prisma } from "@/app/lib/prisma";
-import { stripe, STRIPE_PRICES } from "@/app/lib/stripe";
+import { stripe, PLAN_CONFIG } from "@/app/lib/stripe";
 import { checkoutLimiter, rateLimit } from "@/app/lib/security";
 
 export async function POST(request: Request) {
@@ -11,22 +11,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    // Rate limit per user
     const allowed = await rateLimit(checkoutLimiter, `checkout:${session.userId}`);
     if (!allowed) {
       return NextResponse.json({ error: "Too many attempts. Please wait." }, { status: 429 });
     }
 
-    const { plan, months } = await request.json();
+    const { planId } = await request.json();
 
-    // Validate plan and duration
-    if (!["signals", "managed"].includes(plan) || ![1, 3, 6, 12].includes(months)) {
-      return NextResponse.json({ error: "Plan ou durée invalide" }, { status: 400 });
-    }
-
-    const priceConfig = STRIPE_PRICES[plan]?.[months];
-    if (!priceConfig) {
-      return NextResponse.json({ error: "Configuration de prix introuvable" }, { status: 400 });
+    const plan = PLAN_CONFIG[planId];
+    if (!plan || !plan.priceId) {
+      return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
     }
 
     const user = await prisma.user.findUnique({
@@ -35,7 +29,15 @@ export async function POST(request: Request) {
     });
 
     if (!user) {
-      return NextResponse.json({ error: "Utilisateur introuvable" }, { status: 404 });
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    // Check for existing active subscription
+    const existingSub = await prisma.subscription.findFirst({
+      where: { userId: user.id, status: "ACTIVE" },
+    });
+    if (existingSub) {
+      return NextResponse.json({ error: "You already have an active subscription" }, { status: 400 });
     }
 
     // Create or retrieve Stripe customer
@@ -54,29 +56,30 @@ export async function POST(request: Request) {
       });
     }
 
-    // Create checkout session
+    // Create checkout session in SUBSCRIPTION mode
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
     const checkoutSession = await stripe.checkout.sessions.create({
       customer: stripeCustomerId,
-      mode: "payment",
+      mode: "subscription",
       payment_method_types: ["card"],
       line_items: [
         {
-          price_data: {
-            currency: "eur",
-            product_data: {
-              name: `Kodex ${plan === "signals" ? "Signals" : "Managed Trading"} — ${months} month${months > 1 ? "s" : ""}`,
-            },
-            unit_amount: priceConfig.amount,
-          },
+          price: plan.priceId,
           quantity: 1,
         },
       ],
       metadata: {
         userId: user.id,
-        plan,
-        months: months.toString(),
+        planId,
+        type: plan.type,
+      },
+      subscription_data: {
+        metadata: {
+          userId: user.id,
+          planId,
+          type: plan.type,
+        },
       },
       success_url: `${appUrl}/en/dashboard/subscription?success=true&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${appUrl}/en/subscribe?canceled=true`,
@@ -85,6 +88,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ url: checkoutSession.url });
   } catch (error) {
     console.error("Checkout error:", error);
-    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }

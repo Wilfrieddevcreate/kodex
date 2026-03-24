@@ -4,19 +4,21 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2026-02-25.clover",
 });
 
-// Prices config — map plan type + duration to Stripe price IDs
-// You'll create these in Stripe Dashboard and paste the IDs here
-export const STRIPE_PRICES: Record<string, Record<number, { priceId: string; amount: number }>> = {
-  signals: {
-    1: { priceId: "price_signals_1m", amount: 2999 },
-    3: { priceId: "price_signals_3m", amount: 7999 },
-    6: { priceId: "price_signals_6m", amount: 14999 },
-    12: { priceId: "price_signals_12m", amount: 26999 },
+// Map plan IDs to Stripe Price IDs (recurring)
+export const PLAN_CONFIG: Record<string, { priceId: string; type: "SIGNALS" | "MANAGED"; name: string }> = {
+  signals_monthly: {
+    priceId: process.env.STRIPE_PRICE_SIGNALS_MONTHLY || "",
+    type: "SIGNALS",
+    name: "Kodex Signals — Monthly",
   },
-  managed: {
-    1: { priceId: "price_managed_1m", amount: 9999 },
-    3: { priceId: "price_managed_3m", amount: 26999 },
-    6: { priceId: "price_managed_6m", amount: 49999 },
-    12: { priceId: "price_managed_12m", amount: 89999 },
+  signals_quarterly: {
+    priceId: process.env.STRIPE_PRICE_SIGNALS_QUARTERLY || "",
+    type: "SIGNALS",
+    name: "Kodex Signals — Quarterly",
+  },
+  managed_monthly: {
+    priceId: process.env.STRIPE_PRICE_MANAGED_MONTHLY || "",
+    type: "MANAGED",
+    name: "Kodex Managed Trading — Monthly",
   },
 };

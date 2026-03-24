@@ -40,23 +40,29 @@ export async function POST(request: Request) {
 
   try {
     switch (event.type) {
-      // ─── CHECKOUT COMPLETED ─────────────────────────────
+      // ─── CHECKOUT COMPLETED (subscription created) ────
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
-        const { userId, plan, months } = session.metadata || {};
 
-        if (!userId || !plan || !months) break;
+        if (session.mode !== "subscription") break;
+
+        const { userId, planId, type } = session.metadata || {};
+        if (!userId || !type) break;
+
+        const stripeSubId = session.subscription as string;
+        if (!stripeSubId) break;
 
         // Idempotency check
         const existingSub = await prisma.subscription.findFirst({
-          where: { stripeSubscriptionId: session.id },
+          where: { stripeSubscriptionId: stripeSubId },
         });
         if (existingSub) {
-          console.log(`Subscription already exists for session ${session.id}, skipping`);
+          console.log(`Subscription already exists for ${stripeSubId}, skipping`);
           break;
         }
 
-        const monthsNum = parseInt(months);
+        // Get subscription details from Stripe
+        const stripeSub = await stripe.subscriptions.retrieve(stripeSubId) as unknown as { current_period_start: number; current_period_end: number };
         const user = await prisma.user.findUnique({
           where: { id: userId },
           select: { id: true, firstName: true, lastName: true, email: true, trialEndsAt: true },
@@ -64,36 +70,26 @@ export async function POST(request: Request) {
 
         if (!user) break;
 
-        // Period calculation
-        const now = new Date();
-        let periodStart: Date;
-        if (user.trialEndsAt && user.trialEndsAt > now) {
-          periodStart = new Date(user.trialEndsAt);
-        } else {
-          periodStart = now;
-        }
-
-        const periodEnd = new Date(periodStart);
-        periodEnd.setMonth(periodEnd.getMonth() + monthsNum);
-
-        const subscriptionType = plan === "managed" ? "MANAGED" as const : "SIGNALS" as const;
-        const planLabel = `${plan === "managed" ? "Managed Trading" : "Signals"} — ${monthsNum} month${monthsNum > 1 ? "s" : ""}`;
+        const subscriptionType = type === "MANAGED" ? "MANAGED" as const : "SIGNALS" as const;
+        const periodStart = new Date(stripeSub.current_period_start * 1000);
+        const periodEnd = new Date(stripeSub.current_period_end * 1000);
         const amount = (session.amount_total || 0) / 100;
+        const planLabel = subscriptionType === "MANAGED" ? "Managed Trading" : "Signals";
 
-        // Create subscription
+        // Create subscription in DB
         const subscription = await prisma.subscription.create({
           data: {
             userId,
             type: subscriptionType,
             status: "ACTIVE",
-            stripeSubscriptionId: session.id,
-            stripePriceId: session.metadata?.priceId || null,
+            stripeSubscriptionId: stripeSubId,
+            stripePriceId: planId || null,
             currentPeriodStart: periodStart,
             currentPeriodEnd: periodEnd,
           },
         });
 
-        // Get Stripe receipt URL
+        // Get receipt URL
         let stripeReceiptUrl: string | null = null;
         if (session.payment_intent) {
           try {
@@ -109,7 +105,7 @@ export async function POST(request: Request) {
 
         // Create invoice
         const invoiceNumber = await generateInvoiceNumber();
-        const invoice = await prisma.invoice.create({
+        await prisma.invoice.create({
           data: {
             userId,
             subscriptionId: subscription.id,
@@ -122,22 +118,17 @@ export async function POST(request: Request) {
           },
         });
 
-        // Notify client
-        await notifyUser(
-          userId,
-          "Subscription activated",
-          `Your ${planLabel} subscription is now active. Valid until ${periodEnd.toLocaleDateString("en-US")}.`,
+        // Notifications
+        await notifyUser(userId, "Subscription activated",
+          `Your ${planLabel} subscription is now active. Next billing: ${periodEnd.toLocaleDateString("en-US")}.`,
           "system"
         );
-
-        // Notify admins
-        await notifyAdmins(
-          "New subscription",
+        await notifyAdmins("New subscription",
           `${user.firstName} ${user.lastName} (${user.email}) subscribed to ${planLabel} for ${amount.toFixed(2)}€.`,
           "system"
         );
 
-        // ─── COMMISSION: create if user was referred ───
+        // Commission
         try {
           await createCommission({
             subscriptionId: subscription.id,
@@ -146,61 +137,194 @@ export async function POST(request: Request) {
             referredUserId: userId,
           });
         } catch (err) {
-          console.error("Commission creation error (non-blocking):", err);
+          console.error("Commission creation error:", err);
         }
 
-        console.log(`Subscription + invoice + commission created for ${user.email}: ${planLabel} (${invoiceNumber})`);
+        console.log(`Subscription created: ${user.email} → ${planLabel} (${invoiceNumber})`);
         break;
       }
 
-      // ─── CHECKOUT EXPIRED ───────────────────────────────
-      case "checkout.session.expired": {
-        const session = event.data.object as Stripe.Checkout.Session;
-        console.log(`Checkout session expired: ${session.id}`);
+      // ─── INVOICE PAID (recurring payment success) ─────
+      case "invoice.paid": {
+        const invoice = event.data.object as any;
+
+        // Skip first invoice (handled by checkout.session.completed)
+        if (invoice.billing_reason === "subscription_create") break;
+
+        const stripeSubId = typeof invoice.subscription === "string"
+          ? invoice.subscription
+          : (invoice.subscription as { id?: string })?.id;
+
+        if (!stripeSubId) break;
+
+        const sub = await prisma.subscription.findFirst({
+          where: { stripeSubscriptionId: stripeSubId },
+          include: { user: { select: { id: true, firstName: true, lastName: true, email: true } } },
+        });
+
+        if (!sub) break;
+
+        // Update subscription period
+        const stripeSub = await stripe.subscriptions.retrieve(stripeSubId) as unknown as { current_period_start: number; current_period_end: number };
+        await prisma.subscription.update({
+          where: { id: sub.id },
+          data: {
+            status: "ACTIVE",
+            currentPeriodStart: new Date(stripeSub.current_period_start * 1000),
+            currentPeriodEnd: new Date(stripeSub.current_period_end * 1000),
+          },
+        });
+
+        // Create invoice record
+        const amount = ((invoice.amount_paid as number) || 0) / 100;
+        const invoiceNumber = await generateInvoiceNumber();
+
+        let stripeReceiptUrl: string | null = null;
+        if (invoice.charge) {
+          try {
+            const chargeId = typeof invoice.charge === "string" ? invoice.charge : (invoice.charge as { id: string }).id;
+            const charge = await stripe.charges.retrieve(chargeId);
+            stripeReceiptUrl = (charge as unknown as { receipt_url?: string }).receipt_url || null;
+          } catch (e) {
+            console.error("Failed to get receipt URL:", e);
+          }
+        }
+
+        await prisma.invoice.create({
+          data: {
+            userId: sub.userId,
+            subscriptionId: sub.id,
+            invoiceNumber,
+            amount,
+            plan: sub.type === "MANAGED" ? "Managed Trading" : "Signals",
+            status: "paid",
+            stripePaymentId: typeof invoice.payment_intent === "string" ? invoice.payment_intent : null,
+            stripeReceiptUrl,
+          },
+        });
+
+        // Notify
+        await notifyUser(sub.userId, "Payment successful",
+          `Your subscription has been renewed. Next billing: ${new Date(stripeSub.current_period_end * 1000).toLocaleDateString("en-US")}.`,
+          "system"
+        );
+
+        // Commission for renewal
+        try {
+          await createCommission({
+            subscriptionId: sub.id,
+            grossAmount: amount,
+            stripePaymentId: typeof invoice.payment_intent === "string" ? invoice.payment_intent : undefined,
+            referredUserId: sub.userId,
+          });
+        } catch (err) {
+          console.error("Commission creation error:", err);
+        }
+
+        console.log(`Renewal: ${sub.user.email} — ${invoiceNumber} (${amount}€)`);
         break;
       }
 
-      // ─── CHARGE REFUNDED ───────────────────────────────
+      // ─── INVOICE PAYMENT FAILED ───────────────────────
+      case "invoice.payment_failed": {
+        const invoice = event.data.object as any;
+        const stripeSubId = typeof invoice.subscription === "string"
+          ? invoice.subscription
+          : (invoice.subscription as { id?: string })?.id;
+
+        if (!stripeSubId) break;
+
+        const sub = await prisma.subscription.findFirst({
+          where: { stripeSubscriptionId: stripeSubId },
+        });
+
+        if (sub) {
+          await prisma.subscription.update({
+            where: { id: sub.id },
+            data: { status: "PAST_DUE" },
+          });
+
+          await notifyUser(sub.userId, "Payment failed",
+            "Your subscription payment failed. Please update your payment method to avoid losing access.",
+            "system"
+          );
+        }
+
+        console.log(`Payment failed for subscription ${stripeSubId}`);
+        break;
+      }
+
+      // ─── SUBSCRIPTION UPDATED ─────────────────────────
+      case "customer.subscription.updated": {
+        const stripeSub = event.data.object as any;
+
+        const sub = await prisma.subscription.findFirst({
+          where: { stripeSubscriptionId: stripeSub.id },
+        });
+
+        if (sub) {
+          const newStatus = stripeSub.status === "active" ? "ACTIVE" as const
+            : stripeSub.status === "past_due" ? "PAST_DUE" as const
+            : stripeSub.status === "canceled" ? "CANCELLED" as const
+            : "EXPIRED" as const;
+
+          await prisma.subscription.update({
+            where: { id: sub.id },
+            data: {
+              status: newStatus,
+              currentPeriodStart: new Date(stripeSub.current_period_start * 1000),
+              currentPeriodEnd: new Date(stripeSub.current_period_end * 1000),
+              ...(newStatus === "CANCELLED" ? { cancelledAt: new Date() } : {}),
+            },
+          });
+        }
+        break;
+      }
+
+      // ─── SUBSCRIPTION DELETED ─────────────────────────
+      case "customer.subscription.deleted": {
+        const stripeSub = event.data.object as any;
+
+        const sub = await prisma.subscription.findFirst({
+          where: { stripeSubscriptionId: stripeSub.id },
+        });
+
+        if (sub) {
+          await prisma.subscription.update({
+            where: { id: sub.id },
+            data: { status: "CANCELLED", cancelledAt: new Date() },
+          });
+
+          await cancelCommissions({ subscriptionId: sub.id, reason: "subscription_cancelled" });
+
+          await notifyUser(sub.userId, "Subscription cancelled",
+            "Your subscription has been cancelled. You can resubscribe anytime.",
+            "system"
+          );
+
+          console.log(`Subscription deleted: ${stripeSub.id}`);
+        }
+        break;
+      }
+
+      // ─── CHARGE REFUNDED ──────────────────────────────
       case "charge.refunded": {
         const charge = event.data.object as Stripe.Charge;
         const paymentIntentId = typeof charge.payment_intent === "string" ? charge.payment_intent : charge.payment_intent?.id;
 
         if (paymentIntentId) {
-          const invoice = await prisma.invoice.findFirst({
+          const inv = await prisma.invoice.findFirst({
             where: { stripePaymentId: paymentIntentId },
-            include: { user: { select: { firstName: true, lastName: true } } },
           });
 
-          if (invoice) {
-            await prisma.invoice.update({
-              where: { id: invoice.id },
-              data: { status: "refunded" },
-            });
-
+          if (inv) {
+            await prisma.invoice.update({ where: { id: inv.id }, data: { status: "refunded" } });
             await prisma.subscription.update({
-              where: { id: invoice.subscriptionId },
+              where: { id: inv.subscriptionId },
               data: { status: "EXPIRED", cancelledAt: new Date() },
             });
-
-            // Cancel associated commissions
-            await cancelCommissions({
-              subscriptionId: invoice.subscriptionId,
-              reason: "refund",
-            });
-
-            await notifyUser(
-              invoice.userId,
-              "Subscription cancelled",
-              "Your subscription has been refunded and cancelled."
-            );
-
-            await notifyAdmins(
-              "Refund processed",
-              `Refund for ${invoice.user.firstName} ${invoice.user.lastName} — Invoice ${invoice.invoiceNumber} (${invoice.amount.toFixed(2)}€).`,
-              "system"
-            );
-
-            console.log(`Refund + commission cancel for invoice ${invoice.invoiceNumber}`);
+            await cancelCommissions({ subscriptionId: inv.subscriptionId, reason: "refund" });
+            await notifyUser(inv.userId, "Refund processed", "Your payment has been refunded and subscription cancelled.");
           }
         }
         break;
@@ -212,82 +336,29 @@ export async function POST(request: Request) {
         const chargeId = typeof dispute.charge === "string" ? dispute.charge : dispute.charge?.id;
 
         if (chargeId) {
-          // Get the charge to find the payment intent
           const charge = await stripe.charges.retrieve(chargeId);
           const paymentIntentId = typeof charge.payment_intent === "string" ? charge.payment_intent : null;
 
           if (paymentIntentId) {
-            const invoice = await prisma.invoice.findFirst({
+            const inv = await prisma.invoice.findFirst({
               where: { stripePaymentId: paymentIntentId },
-              include: { user: { select: { id: true, firstName: true, lastName: true, email: true } } },
+              include: { user: { select: { id: true, email: true, firstName: true, lastName: true } } },
             });
 
-            if (invoice) {
-              // Cancel subscription immediately
+            if (inv) {
+              await prisma.invoice.update({ where: { id: inv.id }, data: { status: "disputed" } });
               await prisma.subscription.update({
-                where: { id: invoice.subscriptionId },
+                where: { id: inv.subscriptionId },
                 data: { status: "EXPIRED", cancelledAt: new Date() },
               });
-
-              // Cancel ALL commissions for this subscription
-              await cancelCommissions({
-                subscriptionId: invoice.subscriptionId,
-                reason: "dispute",
-              });
-
-              // Mark invoice
-              await prisma.invoice.update({
-                where: { id: invoice.id },
-                data: { status: "disputed" },
-              });
-
-              // Notify
-              await notifyUser(
-                invoice.userId,
-                "Account suspended",
-                "Your account has been suspended due to a payment dispute. Contact support.",
+              await cancelCommissions({ subscriptionId: inv.subscriptionId, reason: "dispute" });
+              await notifyUser(inv.userId, "Account suspended", "Your account has been suspended due to a payment dispute.");
+              await notifyAdmins("DISPUTE ALERT",
+                `Dispute from ${inv.user.firstName} ${inv.user.lastName} (${inv.user.email}) — ${inv.amount.toFixed(2)}€.`,
                 "system"
               );
-
-              await notifyAdmins(
-                "DISPUTE ALERT",
-                `Payment dispute from ${invoice.user.firstName} ${invoice.user.lastName} (${invoice.user.email}) — Invoice ${invoice.invoiceNumber} (${invoice.amount.toFixed(2)}€). Subscription cancelled, commissions revoked.`,
-                "system"
-              );
-
-              console.log(`DISPUTE: subscription cancelled + commissions revoked for ${invoice.user.email}`);
             }
           }
-        }
-        break;
-      }
-
-      // ─── SUBSCRIPTION CANCELLED (Stripe recurring) ────
-      case "customer.subscription.deleted": {
-        const sub = event.data.object as Stripe.Subscription;
-        const existingSub = await prisma.subscription.findFirst({
-          where: { stripeSubscriptionId: sub.id },
-        });
-
-        if (existingSub) {
-          await prisma.subscription.update({
-            where: { id: existingSub.id },
-            data: { status: "CANCELLED", cancelledAt: new Date() },
-          });
-
-          await cancelCommissions({
-            subscriptionId: existingSub.id,
-            reason: "subscription_cancelled",
-          });
-
-          await notifyUser(
-            existingSub.userId,
-            "Subscription cancelled",
-            "Your subscription has been cancelled.",
-            "system"
-          );
-
-          console.log(`Subscription ${sub.id} cancelled via Stripe`);
         }
         break;
       }
