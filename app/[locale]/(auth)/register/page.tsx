@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/app/i18n/navigation";
 import { useSearchParams } from "next/navigation";
+import { HiOutlineUser, HiOutlineMail, HiOutlinePhone, HiOutlineLockClosed, HiOutlineEye, HiOutlineEyeOff, HiOutlineTag } from "react-icons/hi";
 
 function FlagImg({ code }: { code: string; size?: number }) {
   return <span className={`fi fi-${code.toLowerCase()} inline-block w-5 h-4 rounded-sm`} style={{ backgroundSize: "cover" }} />;
@@ -121,6 +122,8 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [country, setCountry] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [language, setLanguage] = useState("EN");
   const [countryOpen, setCountryOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
@@ -204,18 +207,14 @@ export default function RegisterPage() {
           <div>
             <label htmlFor="lastName" className={labelClass}>{t("lastName")}</label>
             <div className="relative">
-              <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0" />
-              </svg>
+              <HiOutlineUser className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-primary z-10" />
               <input id="lastName" name="lastName" type="text" placeholder="Dupont" required className="input-glass" />
             </div>
           </div>
           <div>
             <label htmlFor="firstName" className={labelClass}>{t("firstName")}</label>
             <div className="relative">
-              <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0" />
-              </svg>
+              <HiOutlineUser className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-primary z-10" />
               <input id="firstName" name="firstName" type="text" placeholder="Jean" required className="input-glass" />
             </div>
           </div>
@@ -225,18 +224,14 @@ export default function RegisterPage() {
           <div>
             <label htmlFor="email" className={labelClass}>{t("email")}</label>
             <div className="relative">
-              <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
-              </svg>
+              <HiOutlineMail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-primary z-10" />
               <input id="email" name="email" type="email" placeholder="jean@exemple.com" required className="input-glass" />
             </div>
           </div>
           <div>
             <label htmlFor="phone" className={labelClass}>{t("phone")}</label>
             <div className="relative">
-              <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
-              </svg>
+              <HiOutlinePhone className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-primary z-10" />
               <input id="phone" name="phone" type="tel" placeholder="+33 6 12 34 56 78" required className="input-glass" />
             </div>
           </div>
@@ -301,19 +296,21 @@ export default function RegisterPage() {
           <div>
             <label htmlFor="password" className={labelClass}>{t("password")}</label>
             <div className="relative">
-              <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-              </svg>
-              <input id="password" name="password" type="password" placeholder={t("passwordPlaceholder")} required minLength={8} className="input-glass" />
+              <HiOutlineLockClosed className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-primary z-10" />
+              <input id="password" name="password" type={showPassword ? "text" : "password"} placeholder={t("passwordPlaceholder")} required minLength={8} className="input-glass pr-12" />
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/50 hover:text-white z-10 transition-colors">
+                {showPassword ? <HiOutlineEyeOff className="h-5 w-5" /> : <HiOutlineEye className="h-5 w-5" />}
+              </button>
             </div>
           </div>
           <div>
             <label htmlFor="confirmPassword" className={labelClass}>{t("confirm")}</label>
             <div className="relative">
-              <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-              </svg>
-              <input id="confirmPassword" name="confirmPassword" type="password" placeholder={t("confirmPlaceholder")} required minLength={8} className="input-glass" />
+              <HiOutlineLockClosed className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-primary z-10" />
+              <input id="confirmPassword" name="confirmPassword" type={showConfirm ? "text" : "password"} placeholder={t("confirmPlaceholder")} required minLength={8} className="input-glass pr-12" />
+              <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/50 hover:text-white z-10 transition-colors">
+                {showConfirm ? <HiOutlineEyeOff className="h-5 w-5" /> : <HiOutlineEye className="h-5 w-5" />}
+              </button>
             </div>
           </div>
         </div>
@@ -323,10 +320,7 @@ export default function RegisterPage() {
             {t("promoCode")} <span className="text-white/30 font-normal normal-case">{t("promoCodeOptional")}</span>
           </label>
           <div className="relative">
-            <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 6h.008v.008H6V6z" />
-            </svg>
+            <HiOutlineTag className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-primary z-10" />
             <input id="promoCode" name="promoCode" type="text" defaultValue={refCode} readOnly={!!refCode} placeholder={t("promoCodePlaceholder")} className={`input-glass ${refCode ? "text-primary font-semibold cursor-not-allowed" : ""}`} />
           </div>
         </div>

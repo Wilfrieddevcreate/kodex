@@ -91,6 +91,13 @@ body {
   padding-left: 1rem;
 }
 
+/* Icons inside glass inputs */
+.relative > svg:first-child,
+.relative > .text-primary:first-child {
+  z-index: 10;
+  pointer-events: none;
+}
+
 /* ─── Dashboard dark cards ────────────────────── */
 
 select option {

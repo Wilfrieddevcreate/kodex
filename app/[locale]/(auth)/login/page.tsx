@@ -3,12 +3,14 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/app/i18n/navigation";
+import { HiOutlineMail, HiOutlineLockClosed, HiOutlineEye, HiOutlineEyeOff } from "react-icons/hi";
 
 export default function LoginPage() {
   const t = useTranslations("auth.login");
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -65,9 +67,7 @@ export default function LoginPage() {
             {t("email")}
           </label>
           <div className="relative">
-            <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
-            </svg>
+            <HiOutlineMail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-primary z-10" />
             <input name="email" type="email" placeholder="name@example.com" required className="input-glass" />
           </div>
         </div>
@@ -77,10 +77,15 @@ export default function LoginPage() {
             {t("password")}
           </label>
           <div className="relative">
-            <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-            </svg>
-            <input name="password" type="password" placeholder="••••••••" required className="input-glass" />
+            <HiOutlineLockClosed className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-primary z-10" />
+            <input name="password" type={showPassword ? "text" : "password"} placeholder="••••••••" required className="input-glass pr-12" />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/50 hover:text-white z-10 transition-colors"
+            >
+              {showPassword ? <HiOutlineEyeOff className="h-5 w-5" /> : <HiOutlineEye className="h-5 w-5" />}
+            </button>
           </div>
         </div>
 
