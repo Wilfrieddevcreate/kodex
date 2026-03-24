@@ -21,8 +21,24 @@ async function sendMessageToChat(token: string, chatId: string, text: string) {
   });
 
   if (!res.ok) {
-    const err = await res.json();
-    console.error(`Telegram send error to ${chatId}:`, err);
+    try {
+      const err = await res.json();
+      console.error(`Telegram send error to ${chatId}:`, err.description || JSON.stringify(err));
+      // If user blocked the bot or chat not found, remove their telegramChatId
+      if (err.error_code === 403 || err.error_code === 400) {
+        try {
+          await prisma.user.updateMany({
+            where: { telegramChatId: chatId },
+            data: { telegramChatId: null },
+          });
+          console.log(`Removed invalid telegramChatId: ${chatId}`);
+        } catch (e) {
+          console.error("Failed to remove invalid chatId:", e);
+        }
+      }
+    } catch {
+      console.error(`Telegram send failed to ${chatId}: HTTP ${res.status}`);
+    }
   }
 }
 

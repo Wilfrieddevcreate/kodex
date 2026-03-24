@@ -42,11 +42,24 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Telegram bot not configured" }, { status: 500 });
     }
 
+    // Build clean data object — ONLY include fields that Telegram actually sent
+    // Telegram sends: id, first_name, last_name?, username?, photo_url?, auth_date, hash
+    const authData: Record<string, string | number> = {};
+    authData.id = id;
+    if (first_name !== undefined && first_name !== null && first_name !== "") authData.first_name = first_name;
+    if (last_name !== undefined && last_name !== null && last_name !== "") authData.last_name = last_name;
+    if (username !== undefined && username !== null && username !== "") authData.username = username;
+    if (photo_url !== undefined && photo_url !== null && photo_url !== "") authData.photo_url = photo_url;
+    authData.auth_date = auth_date;
+    authData.hash = hash;
+
     // Verify the hash
-    const isValid = verifyTelegramAuth(
-      { id, first_name, last_name, username, photo_url, auth_date, hash },
-      settings.telegramBotToken
-    );
+    const isValid = verifyTelegramAuth(authData, settings.telegramBotToken);
+
+    if (!isValid) {
+      console.error("Telegram auth failed. Data received:", JSON.stringify(body));
+      console.error("Data used for verification:", JSON.stringify(authData));
+    }
 
     if (!isValid) {
       return NextResponse.json({ error: "Invalid authentication" }, { status: 403 });
@@ -71,6 +84,28 @@ export async function POST(request: Request) {
       where: { id: session.userId },
       data: { telegramChatId: String(id) },
     });
+
+    // Try to send a welcome message to verify the connection works
+    try {
+      const welcomeRes = await fetch(`https://api.telegram.org/bot${settings.telegramBotToken}/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chat_id: String(id),
+          text: `✅ <b>Telegram connected to Kodex!</b>\n\nYou will now receive trading signals and news directly here.\n\n<b>KODEX</b> — Crypto Signals`,
+          parse_mode: "HTML",
+        }),
+      });
+
+      if (!welcomeRes.ok) {
+        const err = await welcomeRes.json();
+        console.warn("Welcome message failed (user may need to start bot first):", err.description);
+        // Don't fail the connection — the ID is still saved
+        // The user just needs to open the bot and send /start for DMs to work
+      }
+    } catch (e) {
+      console.warn("Welcome message send error:", e);
+    }
 
     return NextResponse.json({ message: "Telegram connected" });
   } catch (error) {
