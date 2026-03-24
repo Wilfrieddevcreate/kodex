@@ -3,28 +3,7 @@ import { requireAdmin } from "@/app/lib/admin-auth";
 import { prisma } from "@/app/lib/prisma";
 import { sendPushToAll } from "@/app/lib/push";
 import { notifyBroadcast } from "@/app/lib/notifications";
-
-async function sendTpTelegram(pair: string, rank: number, price: number) {
-  const settings = await prisma.appSettings.findFirst();
-  if (!settings?.telegramBotToken || !settings?.telegramChannelId) return;
-
-  const text = `🎯 <b>TP${rank} REACHED!</b>\n\n` +
-    `📊 <b>${pair}</b>\n` +
-    `✅ TP${rank}: <b>${price}</b>\n\n` +
-    `⏰ ${new Date().toLocaleString()}\n` +
-    `━━━━━━━━━━━━━━━\n` +
-    `<b>KODEX</b> — Crypto Signals`;
-
-  await fetch(`https://api.telegram.org/bot${settings.telegramBotToken}/sendMessage`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      chat_id: settings.telegramChannelId,
-      text,
-      parse_mode: "HTML",
-    }),
-  });
-}
+import { sendTpReachedToTelegram } from "@/app/lib/telegram";
 
 export async function POST(request: Request) {
   const { error } = await requireAdmin();
@@ -77,8 +56,8 @@ export async function POST(request: Request) {
       url: callLink,
     }).catch(console.error);
 
-    // Telegram
-    sendTpTelegram(pair, target.rank, target.price).catch(console.error);
+    // Telegram DM to active subscribers
+    sendTpReachedToTelegram({ pair, tpRank: target.rank, tpPrice: target.price }).catch(console.error);
 
     return NextResponse.json({ message: `TP${target.rank} marked as reached`, pair, rank: target.rank });
   } catch (err) {
