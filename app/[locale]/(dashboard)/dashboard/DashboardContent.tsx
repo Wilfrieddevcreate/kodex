@@ -296,7 +296,6 @@ export default function DashboardContent({
                           </div>
                           <div className="flex items-center gap-2">
                             <span className={`font-medium ${tp.reached ? "text-emerald-400" : "text-white/70"}`}>{tp.price}</span>
-                            <span className={`text-xs ${tp.reached ? "text-emerald-400/60" : "text-white/30"}`}>({((tp.price - (call.entryMin + call.entryMax) / 2) / ((call.entryMin + call.entryMax) / 2) * 100).toFixed(1)}%)</span>
                             {tp.reached && (
                               <div className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500">
                                 <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
