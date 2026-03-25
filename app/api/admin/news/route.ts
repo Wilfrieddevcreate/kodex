@@ -58,7 +58,12 @@ export async function POST(request: Request) {
     const newsLink = `/dashboard?tab=news&newsId=${news.id}`;
     notifyBroadcast(`New Article: ${title}`, description.slice(0, 100) + (description.length > 100 ? "..." : ""), "news", newsLink).catch(console.error);
     sendPushToAll({ title: "New Article", message: title, url: newsLink }).catch(console.error);
-    sendNewsToTelegram({ title, description }).catch(console.error);
+    sendNewsToTelegram({
+      title, description,
+      imageUrl: imageUrls[0] || null,
+      titleFr: titleFr || null, titleEn: title, titleEs: titleEs || null, titleTr: titleTr || null,
+      descriptionFr: descriptionFr || null, descriptionEn: description, descriptionEs: descriptionEs || null, descriptionTr: descriptionTr || null,
+    }).catch(console.error);
 
     return NextResponse.json({ news });
   } catch (err) {

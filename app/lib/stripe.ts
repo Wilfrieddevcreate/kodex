@@ -48,8 +48,9 @@ export async function getSubscriptionPeriod(stripeSubId: string): Promise<{ star
   // Last fallback: calculate from plan interval
   const start = new Date((sub.start_date || sub.created) * 1000);
   const end = new Date(start);
-  const interval = sub.plan?.interval || "month";
-  const intervalCount = sub.plan?.interval_count || 1;
+  const itemPlan = sub.items?.data?.[0]?.plan;
+  const interval = itemPlan?.interval || sub.plan?.interval || "month";
+  const intervalCount = itemPlan?.interval_count || sub.plan?.interval_count || 1;
   if (interval === "month") end.setMonth(end.getMonth() + intervalCount);
   else if (interval === "year") end.setFullYear(end.getFullYear() + intervalCount);
   else if (interval === "week") end.setDate(end.getDate() + 7 * intervalCount);

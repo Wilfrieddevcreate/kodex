@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import NewsDetailModal from "@/app/[locale]/components/NewsDetailModal";
+import CustomSelect from "@/app/[locale]/components/CustomSelect";
 
 interface CallData {
   id: string;
@@ -224,26 +225,32 @@ export default function DashboardContent({
         <div>
           {/* Filters */}
           <div className="flex flex-wrap gap-3 mb-5">
-            <select
-              value={pairFilter}
-              onChange={(e) => setPairFilter(e.target.value)}
-              className="rounded-xl bg-white/5 border border-white/10 px-4 py-2 text-sm text-white outline-none focus:border-primary cursor-pointer"
-            >
-              <option value="all" className="bg-black">All pairs</option>
-              {uniquePairs.map((pair) => (
-                <option key={pair} value={pair} className="bg-black">{pair}</option>
-              ))}
-            </select>
+            <div className="w-48">
+              <CustomSelect
+                options={[
+                  { value: "all", label: "All pairs" },
+                  ...uniquePairs.map((pair) => ({ value: pair, label: pair })),
+                ]}
+                value={{ value: pairFilter, label: pairFilter === "all" ? "All pairs" : pairFilter }}
+                onChange={(opt) => setPairFilter(opt?.value || "all")}
+                placeholder="Filter by pair"
+                isSearchable
+              />
+            </div>
 
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as "all" | "active" | "inactive")}
-              className="rounded-xl bg-white/5 border border-white/10 px-4 py-2 text-sm text-white outline-none focus:border-primary cursor-pointer"
-            >
-              <option value="all" className="bg-black">All status</option>
-              <option value="active" className="bg-black">Active</option>
-              <option value="inactive" className="bg-black">Inactive</option>
-            </select>
+            <div className="w-40">
+              <CustomSelect
+                options={[
+                  { value: "all", label: "All status" },
+                  { value: "active", label: "Active" },
+                  { value: "inactive", label: "Inactive" },
+                ]}
+                value={{ value: statusFilter, label: statusFilter === "all" ? "All status" : statusFilter === "active" ? "Active" : "Inactive" }}
+                onChange={(opt) => setStatusFilter((opt?.value || "all") as "all" | "active" | "inactive")}
+                placeholder="Filter by status"
+                isSearchable={false}
+              />
+            </div>
           </div>
 
           {filteredCalls.length > 0 ? (

@@ -12,6 +12,7 @@ export async function PUT(request: Request) {
     const firstName = sanitize(body.firstName || "");
     const lastName = sanitize(body.lastName || "");
     const phone = sanitize(body.phone || "");
+    const language = sanitize(body.language || "").toUpperCase();
 
     if (!firstName || !lastName) {
       return NextResponse.json({ error: "Name is required" }, { status: 400 });
@@ -21,9 +22,14 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: "Invalid phone number" }, { status: 400 });
     }
 
+    const validLanguages = ["FR", "EN", "ES", "TR"];
+    const updateData: Record<string, string> = { firstName, lastName };
+    if (phone) updateData.phone = phone;
+    if (language && validLanguages.includes(language)) updateData.language = language;
+
     await prisma.user.update({
       where: { id: session.userId },
-      data: { firstName, lastName, ...(phone ? { phone } : {}) },
+      data: updateData,
     });
 
     return NextResponse.json({ message: "Profile updated" });

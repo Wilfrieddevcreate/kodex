@@ -43,7 +43,10 @@ export default function LoginPage() {
         return;
       }
 
-      router.push(result.user?.role === "ADMIN" ? "/admin" : "/dashboard");
+      // Redirect to user's preferred language
+      const userLocale = result.locale || "en";
+      const destination = result.user?.role === "ADMIN" ? "/admin" : "/dashboard";
+      window.location.href = `/${userLocale}${destination}`;
     } catch {
       setError(t("error"));
       setLoading(false);

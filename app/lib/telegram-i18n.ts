@@ -1,0 +1,57 @@
+// Telegram message translations per language
+
+export const TG_MESSAGES: Record<string, {
+  newSignal: string;
+  entry: string;
+  targets: string;
+  stopLoss: string;
+  news: string;
+  targetReached: string;
+  cryptoSignals: string;
+  cryptoNews: string;
+}> = {
+  EN: {
+    newSignal: "NEW SIGNAL",
+    entry: "Entry",
+    targets: "Targets",
+    stopLoss: "Stop Loss",
+    news: "NEWS",
+    targetReached: "TARGET REACHED",
+    cryptoSignals: "Crypto Signals",
+    cryptoNews: "Crypto News",
+  },
+  FR: {
+    newSignal: "NOUVEAU SIGNAL",
+    entry: "Entrée",
+    targets: "Objectifs",
+    stopLoss: "Stop Loss",
+    news: "ACTUALITÉ",
+    targetReached: "OBJECTIF ATTEINT",
+    cryptoSignals: "Signaux Crypto",
+    cryptoNews: "Actualités Crypto",
+  },
+  ES: {
+    newSignal: "NUEVA SEÑAL",
+    entry: "Entrada",
+    targets: "Objetivos",
+    stopLoss: "Stop Loss",
+    news: "NOTICIAS",
+    targetReached: "OBJETIVO ALCANZADO",
+    cryptoSignals: "Señales Crypto",
+    cryptoNews: "Noticias Crypto",
+  },
+  TR: {
+    newSignal: "YENİ SİNYAL",
+    entry: "Giriş",
+    targets: "Hedefler",
+    stopLoss: "Zarar Durdur",
+    news: "HABER",
+    targetReached: "HEDEF ULAŞILDI",
+    cryptoSignals: "Kripto Sinyalleri",
+    cryptoNews: "Kripto Haberleri",
+  },
+};
+
+export function getTgMessages(lang: string) {
+  return TG_MESSAGES[lang.toUpperCase()] || TG_MESSAGES.EN;
+}

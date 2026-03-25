@@ -60,6 +60,15 @@ export async function POST(request: Request) {
       },
     });
 
+    // Check if invoice already exists for this subscription (prevent duplicates)
+    const existingInvoice = await prisma.invoice.findFirst({
+      where: { subscriptionId: subscription.id },
+    });
+    if (existingInvoice) {
+      // Invoice already created by webhook, skip
+      return NextResponse.json({ status: "created", subscription });
+    }
+
     // Create invoice
     const crypto = require("crypto");
     const year = new Date().getFullYear();

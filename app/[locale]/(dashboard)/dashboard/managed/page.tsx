@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { confirmDelete, showSuccess } from "@/app/lib/swal";
+import CustomSelect from "@/app/[locale]/components/CustomSelect";
 
 const PLATFORMS = ["Binance", "Bybit", "OKX", "Bitget", "Kraken", "KuCoin"];
 
@@ -12,6 +13,7 @@ export default function ManagedPage() {
   const [account, setAccount] = useState<{ platformName: string; apiKey: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [selectedPlatform, setSelectedPlatform] = useState<string>(PLATFORMS[0]);
   const [videoWatched, setVideoWatched] = useState(false);
   const [guideVideo, setGuideVideo] = useState<TutorialVideo | null>(null);
 
@@ -144,9 +146,13 @@ export default function ManagedPage() {
 
         <div>
           <label className="block text-xs text-white/30 uppercase tracking-wider mb-2">Platform</label>
-          <select name="platform" required className={inputClass}>
-            {PLATFORMS.map((p) => <option key={p} value={p} className="bg-black text-white">{p}</option>)}
-          </select>
+          <input type="hidden" name="platform" value={selectedPlatform} />
+          <CustomSelect
+            options={PLATFORMS.map((p) => ({ value: p, label: p }))}
+            value={{ value: selectedPlatform, label: selectedPlatform }}
+            onChange={(opt) => setSelectedPlatform(opt?.value || PLATFORMS[0])}
+            isSearchable={false}
+          />
         </div>
 
         <div>

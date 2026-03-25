@@ -9,7 +9,7 @@ export default async function SettingsPage() {
 
   const user = await prisma.user.findUnique({
     where: { id: session.userId },
-    select: { id: true, firstName: true, lastName: true, email: true, phone: true, telegramChatId: true },
+    select: { id: true, firstName: true, lastName: true, email: true, phone: true, language: true, telegramChatId: true },
   });
 
   if (!user) redirect("/login");

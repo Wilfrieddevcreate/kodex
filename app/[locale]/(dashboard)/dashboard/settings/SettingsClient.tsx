@@ -5,8 +5,17 @@ import toast from "react-hot-toast";
 import { showSuccess, showError, confirmDelete } from "@/app/lib/swal";
 import { useRouter } from "@/app/i18n/navigation";
 import TelegramLoginWidget from "@/app/[locale]/components/TelegramLoginWidget";
+import CustomSelect from "@/app/[locale]/components/CustomSelect";
+import FlagIcon from "@/app/[locale]/components/FlagIcon";
 
-interface UserData { id: string; firstName: string; lastName: string; email: string; phone: string; telegramChatId: string | null; }
+const LANGUAGE_OPTIONS = [
+  { value: "FR", label: "Français", country: "FR" },
+  { value: "EN", label: "English", country: "GB" },
+  { value: "ES", label: "Español", country: "ES" },
+  { value: "TR", label: "Türkçe", country: "TR" },
+];
+
+interface UserData { id: string; firstName: string; lastName: string; email: string; phone: string; language: string; telegramChatId: string | null; }
 
 export default function SettingsClient({ user, telegramBotUsername }: { user: UserData; telegramBotUsername: string | null }) {
   const router = useRouter();
@@ -28,7 +37,10 @@ export default function SettingsClient({ user, telegramBotUsername }: { user: Us
     setSavingProfile(false);
     if (res.ok) {
       showSuccess("Profile updated");
-      router.refresh();
+      // If language changed, redirect to the new locale
+      const langToLocale: Record<string, string> = { FR: "fr", EN: "en", ES: "es", TR: "tr" };
+      const newLocale = langToLocale[profile.language] || "en";
+      window.location.href = `/${newLocale}/dashboard/settings`;
     } else {
       const data = await res.json();
       toast.error(data.error || "Failed to update");
@@ -106,6 +118,23 @@ export default function SettingsClient({ user, telegramBotUsername }: { user: Us
           <div>
             <label className="block text-xs font-medium text-white/30 uppercase tracking-wider mb-2">Phone</label>
             <input value={profile.phone} onChange={(e) => setProfile({ ...profile, phone: e.target.value })} className={inputClass} />
+          </div>
+          <div className="sm:col-span-2">
+            <label className="block text-xs font-medium text-white/30 uppercase tracking-wider mb-2">Language</label>
+            <CustomSelect
+              options={LANGUAGE_OPTIONS.map((l) => ({
+                value: l.value,
+                label: l.label,
+                icon: <FlagIcon code={l.country} size="sm" />,
+              }))}
+              value={{
+                value: profile.language,
+                label: LANGUAGE_OPTIONS.find((l) => l.value === profile.language)?.label || "English",
+                icon: <FlagIcon code={LANGUAGE_OPTIONS.find((l) => l.value === profile.language)?.country || "GB"} size="sm" />,
+              }}
+              onChange={(opt) => setProfile({ ...profile, language: opt?.value || "EN" })}
+              isSearchable={false}
+            />
           </div>
         </div>
         <button type="submit" disabled={savingProfile} className="btn-glow mt-5 rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover disabled:opacity-50">

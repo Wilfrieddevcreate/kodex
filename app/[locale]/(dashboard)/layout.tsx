@@ -65,6 +65,9 @@ export default async function DashboardLayout({
     accessStatus = "none";
   }
 
+  // Pass hasAccess to children via props won't work in server layout
+  // Instead, the AccessBanner handles blocking by showing full-screen overlay for expired/none
+
   return (
     <div className="flex h-full bg-black">
       <Sidebar subscriptionType={activeSub?.type || null} />

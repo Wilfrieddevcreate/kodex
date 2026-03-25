@@ -40,8 +40,13 @@ export async function POST(request: Request) {
 
     const token = generateToken(user.id);
 
+    // Map user language to locale code
+    const langToLocale: Record<string, string> = { FR: "fr", EN: "en", ES: "es", TR: "tr" };
+    const userLocale = langToLocale[user.language?.toUpperCase() || ""] || "en";
+
     const response = NextResponse.json({
       emailVerified: true,
+      locale: userLocale,
       user: {
         id: user.id,
         firstName: user.firstName,

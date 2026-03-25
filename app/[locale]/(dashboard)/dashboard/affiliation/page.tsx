@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { showSuccess } from "@/app/lib/swal";
+import CustomSelect from "@/app/[locale]/components/CustomSelect";
 
 interface ReferralData { id: string; name: string; date: string; hasSubscription: boolean; }
 interface AffData { id: string; status: string; promoCode: string | null; referralLink: string | null; }
@@ -31,6 +32,7 @@ export default function AffiliationPage() {
   const [tab, setTab] = useState<"referrals" | "commissions">("referrals");
   const [showWithdraw, setShowWithdraw] = useState(false);
   const [withdrawing, setWithdrawing] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState("iban");
   const [withdrawals, setWithdrawals] = useState<{ id: string; amount: number; paymentMethod: string; status: string; createdAt: string }[]>([]);
 
   useEffect(() => {
@@ -214,11 +216,17 @@ export default function AffiliationPage() {
             </div>
             <div>
               <label className="block text-xs text-white/30 uppercase tracking-wider mb-2">Payment method</label>
-              <select name="paymentMethod" required className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm text-white outline-none focus:border-primary">
-                <option value="iban" className="bg-black">Bank transfer (IBAN)</option>
-                <option value="paypal" className="bg-black">PayPal</option>
-                <option value="mobile_money" className="bg-black">Mobile Money</option>
-              </select>
+              <input type="hidden" name="paymentMethod" value={paymentMethod} />
+              <CustomSelect
+                options={[
+                  { value: "iban", label: "Bank transfer (IBAN)" },
+                  { value: "paypal", label: "PayPal" },
+                  { value: "mobile_money", label: "Mobile Money" },
+                ]}
+                value={{ value: paymentMethod, label: paymentMethod === "iban" ? "Bank transfer (IBAN)" : paymentMethod === "paypal" ? "PayPal" : "Mobile Money" }}
+                onChange={(opt) => setPaymentMethod(opt?.value || "iban")}
+                isSearchable={false}
+              />
             </div>
             <div>
               <label className="block text-xs text-white/30 uppercase tracking-wider mb-2">Payment details</label>
